@@ -67,3 +67,4 @@ cluster.put('/:id', async function(req,res,next) {
     }
 });
 
+module.exports = cluster;
