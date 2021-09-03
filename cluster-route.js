@@ -28,7 +28,7 @@ cluster.get('/cluster/district/:id', function(req,res,next) {
 
 
 /*Create cluster */
-cluster.post('/', async function(req, res, next) {
+cluster.post('create/', async function(req, res, next) {
     var clusterJson = req.body;
     var requester = util.getUser(req);
     try{
