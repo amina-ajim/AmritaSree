@@ -46,3 +46,22 @@ cluster.post('/', async function(req, res, next) {
     }
 });
 
+/*Cluster Updation*/
+cluster.put('/:id', async function(req,res,next) { 
+    var clusterJson = req.body;
+    var requester = util.getUser(req);
+
+    try{
+        let clusterUpdated = await clusterHelper.clusterUpdate(clusterJson, requester);
+        if(clusterUpdated) {
+            responder.respond(res,clusterUpdated,responder.SUCCESS,"Cluster updated successfully");
+        }
+        else{
+            responder.respond(res,null,responder.FAILED,"Cluster updation failed");
+        }
+    } catch(fault) {
+        logger.error("Cluster updation failed. Reason: " + fault);
+        responder.respond(res,null,responder.FAILED,"Cluster updation failed. Reason: " + fault);
+    }
+});
+
