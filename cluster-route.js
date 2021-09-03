@@ -49,7 +49,7 @@ cluster.post('create/', async function(req, res, next) {
 });
 
 /*Cluster Updation*/
-cluster.put('/:id', async function(req,res,next) { 
+cluster.put('/group/:id', async function(req,res,next) { 
     var clusterJson = req.body;
     var requester = util.getUser(req);
 
