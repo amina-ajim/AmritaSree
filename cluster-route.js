@@ -7,9 +7,24 @@ var logger = require('../helpers/logger-helper').logger;
 var groupHelper = require('../helpers/group-helper')
 var util = require('./util');
 
+cluster.get('/cluster/district/:id', function(req,res,next) { 
+    let reqUser = util.getUser(req);
+    let districtId = parseInt(req.params.id);
+    var district = clusterHelper.findDistrictById(districtId);
+    try{
+        let clusterModels = clusterHelper.findAllByDistrictId(district,reqUser);
+        if(clusterModels && clusterModels.length > 0) {
+            responder.respond(res,clusterModels,responder.SUCCESS,"Clusters retrieved successfully");
+        }
+        else {
+            responder.respond(res,null,responder.FAILED,"No clusters found");
+        }
+    } catch(fault) {
+        logger.error("Cluster query failed. Reason: ", fault);
+        responder.respond(res,null,responder.FAILED,"Cluster query failed. Reason: "+ fault);
+    }
 
-
-
+});
 
 
 /*Create cluster */
