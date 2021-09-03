@@ -7,6 +7,8 @@ var logger = require('../helpers/logger-helper').logger;
 var groupHelper = require('../helpers/group-helper')
 var util = require('./util');
 
+
+/*GET cluster listing.*/
 cluster.get('/cluster/district/:id', function(req,res,next) { 
     let reqUser = util.getUser(req);
     let districtId = parseInt(req.params.id);
