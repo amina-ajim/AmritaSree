@@ -78,7 +78,7 @@
     
      findAllByDistrictId: function (district, requestingUser) {
         if (this.canManageDistrict(requestingUser, district.distictId))
-            return this.districtIdGroup[district.districtId];
+            return this.districtIdCluster[district.districtId];
         else
             throw "Unauthorized user";
     },
