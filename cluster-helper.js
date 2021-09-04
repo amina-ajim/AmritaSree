@@ -1,6 +1,3 @@
-//Cluster Helper
-
- "use strict";
  var logger = require('./logger-helper').logger;
  var models = require('../models');
  var statusHelper = require('./status-helper');
@@ -8,9 +5,8 @@
  var utilHelper = require('./util-helper');
  var Constants= require('../constants');
  var clusterHelper=require('./cluster-route');
- var groupHelper=require('./group-route');
-
-
+ var stateHelper=require('./state-route');
+ var districtHelper=require('./district-route');
 
  var ClusterHelper = {
      cacheLoaded: false,
@@ -76,9 +72,15 @@
          }
      },
     
-     findAllByDistrictId: function (district, requestingUser) {
-        if (this.canManageDistrict(requestingUser, district.distictId))
-            return this.districtIdCluster[district.districtId];
+     findAllByDistrictId: function (cluster, requestingUser) {
+        var groupid=requestingUser.groupid
+        var groupx=group.groupId
+        var clusterid= groupx.clusterId
+        var clusterx = cluster.clusterid
+        var districtid = clusterx.distictId
+    
+        if (this.canManageCluster(requestingUser, cluster.clusterId))
+            return this.districIdCluster[district.districtId];
         else
             throw "Unauthorized user";
     },
@@ -91,14 +93,24 @@
         );
     },
 
-    findClusterById: function (id) {
+    findClusterById: function (requestingUser) {
+
+        var groupid=requestingUser.groupid
+        var groupx=group.groupId
+        var clusterid= groupx.clusterId
+
         return models.Cluster.findOne({
-            where: { clusterId: id, statusId: statusHelper.statusMap['Active'].statusId },
+            where: { clusterId: clusterid, statusId: statusHelper.statusMap['Active'].statusId },
         });
     },
 
-    findClusterByIdMap: function(id){
-        return clusterIdMap[id];
+
+    findClusterByIdMap: function(requestingUser){
+        var groupid=requestingUser.groupid
+        var groupx=group.groupId
+        var clusterid= groupx.clusterId
+
+        return clusterIdMap[clusterid];
 
     },
 
@@ -149,35 +161,31 @@
     },
 
     
-    updateDistrictId: async function(clusterToUpdate,requester){
-        var cluster = await this.findGroupByIdMap(clusterToUpdate.clusterId);
-        if(!districtHelper.canAddToCluster(clusterToUpdate,requester))
-            throw "Unauthorized request";
-        else {
-            cluster.districtId = clusterToUpdate.districtId;
-            var updatedCluster = cluster.save();
-            this.updateToCache(updatedCluster);
-            return updatedCluster;
-        }
-    },
     
     canAddToCluster: function(user,requester){
         console.log(user.clusterId);
+
+        var groupid=requester.groupid
+        var groupx=group.groupId
+        var clusterid= groupx.clusterId
+
         if(requester.role==Constants.CLUSTER_ADMIN){
-            if(requester.clusterId==0){
+            if(clusterid==0){
                 if(user.userId==requester.userId)
                     return true;
                  else
                     return false;
             }
+
             else if(requester.userId==user.userId){
-                if(requester.clusterId!=user.clusterId)
-                    return false;
-                else
+                if(clusterid==user.clusterId)
                     return true;
+                else
+                    return false;
              }
-            else if(requester.clusterId==user.clusterId)
-                return(user.clusterId==requester.clusterId);
+
+            else if(clusterid==user.clusterId)
+                return true;
         }
         else
             return false;
@@ -185,7 +193,7 @@
    
     canManageStatus: function(cluster,requester){
         if(requester.role == Constants.STATE_ADMIN){
-            var districtId = this.findGroupById(district.groupId).clusterId;
+            var districtId = cluster.districtId;
             var stateId = stateHelper.findStateByDistrict(districtId).stateId;
             return (requester.stateId == stateId);
         }
@@ -193,45 +201,52 @@
             return false;
     },
    
-    canCreateDistrict: function(cluster, requester){
-            if(requester.role == Constants.CLUSTER_ADMIN)
-                return true;
-            else if(requester.role== Constants.SYSTEM_ADMIN)
-                    return true;
-            else if(requester.role == Constants.STATE_ADMIN){
-                var districtId = this.findGroupById(district.groupId).clusterId;
-                var stateId = stateHelper.findStateByDistrict(districtId).stateId;
-                return (requester.stateId == stateId);
-            }
-        },
+    canCreateCluster: function(cluster,requester){
+        var groupid=requester.groupid
+        var groupx=group.groupId
+        var clusterid= groupx.clusterId
 
-    canManageCluster: function(cluster, requester){
-        if(requester.role == Constants.CLUSTER_ADMIN)
-            return (requester.clusterId == cluster.clusterId);
+        if(requester.role == Constants.CLUSTER_ADMIN){
+
+            return (clusterid == cluster.clusterId);
+        }
+            
 
         else if(requester.role== Constants.SYSTEM_ADMIN)
                 return true;
+
         else if(requester.role == Constants.STATE_ADMIN){
-            var districtId = this.findClusterById(clusterId).districtId;
+            var districtId = this.findClusterById(requester).districtId;
             var stateId = stateHelper.findStateByDistrict(districtId).stateId;
             return (requester.stateId == stateId);
+           
         }
     },
 
-    canManageDistrict: function(cluster,requester){
+    canManageCluster: function(cluster, requester){
+        var groupid=requester.groupid
+        var groupx=group.groupId
+        var clusterid= groupx.clusterId
+
         if(requester.role == Constants.CLUSTER_ADMIN){
-            var requestingUserCluster= this.findClusterById(requestingUser.clusterId)
-            return (requestingUserCluster.clusterId == clusterid);
+
+            return (clusterid == cluster.clusterId);
         }
-    }
+            
+
+        else if(requester.role== Constants.SYSTEM_ADMIN)
+                return true;
+
+        else if(requester.role == Constants.STATE_ADMIN){
+            var districtId = this.findClusterById(requester).districtId;
+            var stateId = stateHelper.findStateByDistrict(districtId).stateId;
+            return (requester.stateId == stateId);
+           
+        }
+    },
 
  };
 
  ClusterHelper.updateCache();
  module.exports = ClusterHelper;
  
-
-
-
-
-
