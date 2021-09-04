@@ -8,6 +8,9 @@
  var utilHelper = require('./util-helper');
  var Constants= require('../constants');
  var clusterHelper=require('./cluster-route');
+ var groupHelper=require('./group-route');
+
+
 
  var ClusterHelper = {
      cacheLoaded: false,
