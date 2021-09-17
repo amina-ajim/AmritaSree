@@ -13,7 +13,7 @@
      cluster: [],
 
      clusterIdMap: {},
-     districtIdGroup : new Map(),
+     districtIdCluster : new Map(),
      updateCache: async function () {
          var ClusterHelper = this;
          if (statusHelper.cacheLoaded) {
@@ -40,7 +40,7 @@
      addToCache: function (cluster) { 
          cluster = JSON.parse(JSON.stringify(cluster));
     
-          this.clusters.push(cluster);
+          this.cluster.push(cluster);
         
          this.clusterIdMap[cluster.clusterId] = cluster;
 
